@@ -1,7 +1,7 @@
 PROGRAM WorkWithQueryString(INPUT, OUTPUT);
 USES
   DOS;
-
+  
 FUNCTION GetQueryStringParameter(Key: STRING): STRING;
 VAR
   Position, EndPos: INTEGER;
@@ -31,5 +31,5 @@ BEGIN
   WRITELN;
   WRITELN('First Name: ', GetQueryStringParameter('first_name'));
   WRITELN('Last Name: ', GetQueryStringParameter('last_name'));
-  WRITELN('Age: ', GetQueryStringParameter('age'));
+  WRITELN('Age: ', GetQueryStringParameter('age'))
 END.

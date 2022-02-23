@@ -3,7 +3,6 @@ USES
   DOS;
 VAR
   QString: STRING;
-
 BEGIN
   WRITELN('Content-Type: text/plain');
   WRITELN;

@@ -1,5 +1,6 @@
 PROGRAM PrintInfo(INPUT, OUTPUT);
-USES dos;
+USES 
+  DOS;
 BEGIN
   // http://localhost:4001/cgi-bin/prog2.cgi/?name=ivan
   WRITELN('Content-Type: text/plain');
