@@ -1,4 +1,6 @@
 <?php
+header('Content-Type: text/plain');
+
 $text = htmlspecialchars($_GET['text']);
 $blankFlag = 1;
 $result = '';
