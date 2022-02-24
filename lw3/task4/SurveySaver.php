@@ -10,9 +10,9 @@ function parseUserFile(string $filePath, array $parameters, array $parametersDes
     # полашаем, что описание и сам параметр разделены с помощью ': '
     $fileHandle = fopen(getcwd() . '\\' . $filename, 'rt');
     if ($fileHandle) {
-        while ($line = fgets($fileHandle)) 
+        while ($line = fgets($fileHandle))  # читаем в $line и сразу сравниваем полученный результат с false
         {
-            $line = trim($line);
+            $line = trim($line);  # убираем \n в конце 
             
             $delimiterPos = strpos(':', $line);
             if (!$delimiterPos & (strlen($line) !== 0))
@@ -26,7 +26,7 @@ function parseUserFile(string $filePath, array $parameters, array $parametersDes
              
             # <ОПИСАНИЕ ПАРАМЕТРА><':'><' '><ПАРАМЕТР><КОНЕЦ СТРОКИ>. Добавляя 2 перескакиваем c <':'> к <ПАРАМЕТР> и копируем его.
             # С помощью trim() убираем \n
-                $parameter = trim(substr($line, $delimiterPos + 2));
+                $parameter = substr($line, $delimiterPos + 2);
                 $parameters[$currentParameterIndex] = $parameter;
             }
         }
@@ -41,29 +41,32 @@ function parseUserFile(string $filePath, array $parameters, array $parametersDes
 function createUserFile(string $filename, array $parameters, array $parametersDescriptions): ?bool
 {
     $fileHandler = fopen(getcwd() . '\\' . $filename, 'wt');
+    if (!fileHandler)
+        return false;  # Если не удалось открыть файл, сразу же выводим false
+    
     for ($i = 0; $i < count($parameters); $i++) 
     {
-        $status = fwrite($fileHandler, $parametersDescriptions[$i] . ': ' . $parameters[$i] . "\n");
+        $status = fwrite($fileHandler, $parametersDescriptions[$i] . ': ' . $parameters[$i] . "\n");  # записываем в формате <ОПИСАНИЕ ПАРАМЕТТРА><': '><ПАРАМЕТР><"\n">
         if ($status === false)
-            return false;
+            return false;  # Если произошла ошибка во время записи, выводим false
     }
     
-    return true;
+    return true;  # ошибок не возникало, выводим true
 }
 
 function dumpUserData(string $email, string $firstName, string $lastName, string $age): ?string
 {
     # global $NO_EMAIL_ERROR, $FILE_ERROR, $RECORD_CREATED_OK;
-    if (is_null($email))
+    if ($email === '')  # Все параметры переведены к типу string. Значения NULL не должны попасть на вход
         return 'no_email';
     
-    if (file_exists('data') === false)
+    if (file_exists('data') === false)  # если папка с юзерами отсутствует, создаём её
         mkdir('data');
     
     $relativePath = '\\data\\';
     
-    $parameters             = [$firstName,   $lastName,   $email,  $age];
-    $parametersDescriptions = ['First Name', 'Last Name', 'Email', 'Age'];
+    $parameters             = [$firstName,   $lastName,   $email,  $age];  # параметр и его описание связаны; в parseUserFile параметр присваивается на основе его описания
+    $parametersDescriptions = ['First Name', 'Last Name', 'Email', 'Age']; # Параметр и его описание должны быть строго в одинаковом порядке
     
     if (file_exists($relativePath . $email)) {
         $alreadyExistsParameters = parseUserFile($relativePath . $email, $parameters, $parametersDescriptions);
@@ -94,5 +97,6 @@ $firstName = is_null($_GET['first_name']) ? '' : $_GET['first_name'];
 $lastName = is_null($_GET['last_name']) ? '' : $_GET['last_name'];
 $age = is_null($_GET['age']) ? '' : $_GET['age'];
 $email = is_null($_GET['email']) ? '' : $_GET['email'];
-echo dumpUserData($email, $firstName, $lastName, $age);
+
+echo dumpUserData($email, $firstName, $lastName, $age);  # выводим статус операции
 # http://localhost:8080/SurveySaver.php?email=vasya@mail.ru&first_name=vasilii&age=20&last_name=pupkeen
