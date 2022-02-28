@@ -4,8 +4,8 @@ header('Content-Type: text/plain');
 $text = htmlspecialchars(is_null($_GET['text']) ? '' : $_GET['text']);
 $blankFlag = 1;
 $result = '';
-# $space = chr(109);
-$space = ' ';
+$space = chr(109);
+
 for ($i = 0; $i < strlen($text); $i++) 
 {
     if ($text[$i] != $space)

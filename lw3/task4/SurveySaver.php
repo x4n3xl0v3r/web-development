@@ -5,20 +5,23 @@ const NO_EMAIL_ERROR = 0;
 const FILE_ERROR = 1;
 const RECORD_CREATED_OK = 2;
 
-function parseUserFile(string $filePath, array $parameters, array $parametersDescriptions): ?array
+function parseUserFile(string $filename, array $parameters, array $parametersDescriptions): ?array
 {
     # полашаем, что описание и сам параметр разделены с помощью ': '
-    $fileHandle = fopen(getcwd() . '\\' . $filename, 'rt');
+    $fileHandle = fopen($filename, 'rt');
     if ($fileHandle) {
         while ($line = fgets($fileHandle))  # читаем в $line и сразу сравниваем полученный результат с false
         {
             $line = trim($line);  # убираем \n в конце 
+            for ($delimiterPos = 0; $delimiterPos < strlen($line); $delimiterPos++)
+                if ($line[$delimiterPos] === ':')
+                    break;
             
-            $delimiterPos = strpos(':', $line);
-            if (!$delimiterPos & (strlen($line) !== 0))
+            # $delimiterPos = strpos(':', $line);
+            if (($delimiterPos === false) & (strlen($line) !== 0)) {
                 return NULL;  # файл поврежден, не работаем с ним
-            
-            $parameterName = substr($line, 0, $delimiterPos - 1);  # находим описание
+            }
+            $parameterName = substr($line, 0, $delimiterPos);  # находим описание
             $currentParameterIndex = array_search($parameterName, $parametersDescriptions);  # по описанию находим, где он будет находится в $parameters
             # если есть неизвестный параметр, отбрасываем его
             if ($currentParameterIndex !== false)
@@ -40,8 +43,8 @@ function parseUserFile(string $filePath, array $parameters, array $parametersDes
 
 function createUserFile(string $filename, array $parameters, array $parametersDescriptions): ?bool
 {
-    $fileHandler = fopen(getcwd() . '\\' . $filename, 'wt');
-    if (!fileHandler)
+    $fileHandler = fopen($filename, 'wt');
+    if (!$fileHandler)
         return false;  # Если не удалось открыть файл, сразу же выводим false
     
     for ($i = 0; $i < count($parameters); $i++) 
@@ -63,25 +66,29 @@ function dumpUserData(string $email, string $firstName, string $lastName, string
     if (file_exists('data') === false)  # если папка с юзерами отсутствует, создаём её
         mkdir('data');
     
-    $relativePath = '\\data\\';
+    $relativePath = getcwd() . '\\data\\';
     
     $parameters             = [$firstName,   $lastName,   $email,  $age];  # параметр и его описание связаны; в parseUserFile параметр присваивается на основе его описания
     $parametersDescriptions = ['First Name', 'Last Name', 'Email', 'Age']; # Параметр и его описание должны быть строго в одинаковом порядке
     
-    if (file_exists($relativePath . $email)) {
+    if (file_exists($relativePath . $email)) 
+    {
         $alreadyExistsParameters = parseUserFile($relativePath . $email, $parameters, $parametersDescriptions);
+        # echo $alreadyExistsParameters[0] . ' ' . $alreadyExistsParameters[1] . ' ' . $alreadyExistsParameters[2] . ' ' . $alreadyExistsParameters[3] . "\n";
         if (is_null($alreadyExistsParameters))
             return 'file_error';
         
-        for ($i = 0; $i < count($alreadyExistsParameters); $i++)
+        for ($i = 0; $i < count($parametersDescriptions); $i++)
         {
-            if ($parameters[$i] === '')
+            if ($parameters[$i] === '') 
                 $parameters[$i] = $alreadyExistsParameters[$i];
-            
-            unlink($relativePath . $email);
-            if (!createUserFile($relativePath . $email, $parameters, $parametersDescriptions))
-                return 'file_error';
         }
+        
+        # echo $parameters[0] . ' ' . $parameters[1] . ' ' . $parameters[2] . ' ' . $parameters[3] . "\n"; 
+        
+        unlink($relativePath . $email);
+        if (!createUserFile($relativePath . $email, $parameters, $parametersDescriptions))
+            return 'file_error';
     }
     else
     {
@@ -97,6 +104,5 @@ $firstName = is_null($_GET['first_name']) ? '' : $_GET['first_name'];
 $lastName = is_null($_GET['last_name']) ? '' : $_GET['last_name'];
 $age = is_null($_GET['age']) ? '' : $_GET['age'];
 $email = is_null($_GET['email']) ? '' : $_GET['email'];
-
 echo dumpUserData($email, $firstName, $lastName, $age);  # выводим статус операции
 # http://localhost:8080/SurveySaver.php?email=vasya@mail.ru&first_name=vasilii&age=20&last_name=pupkeen
