@@ -1,6 +1,8 @@
 <?php
 header('Content-Type: text/plain');
 
+# http://localhost:8080/CheckIdentifier.php?identifier=ChTextMode
+
 function checkIdentifier(string $ident, int $scanPos): ?bool
 {
     if ($scanPos > 0) {

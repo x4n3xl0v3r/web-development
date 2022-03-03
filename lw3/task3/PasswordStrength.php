@@ -1,6 +1,8 @@
 <?php
 header('Content-Type: text/plain');
 
+# http://localhost:8080/PasswordStrength.php?password=MyGreatPasswd123132
+
 function calculatePasswordStrength(string $password): ?int
 {
     $digitsCount = 0;  # инициализация счётчиков

@@ -1,6 +1,9 @@
 <?php
 header('Content-Type: text/plain');
 
+# http://localhost:8080/SurveySaver.php?email=test01@mail.ru&first_name=Peter
+# http://localhost:8080/SurveySaver.php?email=test01@mail.ru&age=30
+
 const NO_EMAIL_ERROR = 0;
 const FILE_ERROR = 1;
 const RECORD_CREATED_OK = 2;
@@ -74,7 +77,6 @@ function dumpUserData(string $email, string $firstName, string $lastName, string
     if (file_exists($relativePath . $email)) 
     {
         $alreadyExistsParameters = parseUserFile($relativePath . $email, $parameters, $parametersDescriptions);
-        # echo $alreadyExistsParameters[0] . ' ' . $alreadyExistsParameters[1] . ' ' . $alreadyExistsParameters[2] . ' ' . $alreadyExistsParameters[3] . "\n";
         if (is_null($alreadyExistsParameters))
             return 'file_error';
         
@@ -83,8 +85,6 @@ function dumpUserData(string $email, string $firstName, string $lastName, string
             if ($parameters[$i] === '') 
                 $parameters[$i] = $alreadyExistsParameters[$i];
         }
-        
-        # echo $parameters[0] . ' ' . $parameters[1] . ' ' . $parameters[2] . ' ' . $parameters[3] . "\n"; 
         
         unlink($relativePath . $email);
         if (!createUserFile($relativePath . $email, $parameters, $parametersDescriptions))
