@@ -1,37 +1,33 @@
 <?php
 header('Content-Type: text/plain');
 
-# http://localhost:8080/SurveySaver.php?email=test01@mail.ru&first_name=Peter
-# http://localhost:8080/SurveySaver.php?email=test01@mail.ru&age=30
-
 const NO_EMAIL_ERROR = 0;
 const FILE_ERROR = 1;
 const RECORD_CREATED_OK = 2;
 
-function parseUserFile(string $filename, array $parameters, array $parametersDescriptions): ?array
-{
-    # полашаем, что описание и сам параметр разделены с помощью ': '
-    $fileHandle = fopen($filename, 'rt');
+function parseUserFile(string $filename, array $parametersDescriptions): ?array
+{   
+    $parameters = [];
+    for ($i = 0; $i < count($parametersDescriptions); $i++)
+        $parameters[$i] = 0;
+    
+    $fileHandle = fopen($filename, 'rt');   # описание и сам параметр разделены с помощью ': '
     if ($fileHandle) {
         while ($line = fgets($fileHandle))  # читаем в $line и сразу сравниваем полученный результат с false
         {
             $line = trim($line);  # убираем \n в конце 
-            for ($delimiterPos = 0; $delimiterPos < strlen($line); $delimiterPos++)
+            for ($delimiterPos = 0; $delimiterPos < strlen($line); $delimiterPos++)  # поиск : 
                 if ($line[$delimiterPos] === ':')
                     break;
             
-            # $delimiterPos = strpos(':', $line);
-            if (($delimiterPos === false) & (strlen($line) !== 0)) {
-                return NULL;  # файл поврежден, не работаем с ним
-            }
+            if (($delimiterPos === false) & (strlen($line) !== 0))
+                return null;  # файл поврежден, не работаем с ним
+       
             $parameterName = substr($line, 0, $delimiterPos);  # находим описание
             $currentParameterIndex = array_search($parameterName, $parametersDescriptions);  # по описанию находим, где он будет находится в $parameters
-            # если есть неизвестный параметр, отбрасываем его
-            if ($currentParameterIndex !== false)
+            if ($currentParameterIndex !== false) # если есть неизвестный параметр, отбрасываем его
             {
-             
             # <ОПИСАНИЕ ПАРАМЕТРА><':'><' '><ПАРАМЕТР><КОНЕЦ СТРОКИ>. Добавляя 2 перескакиваем c <':'> к <ПАРАМЕТР> и копируем его.
-            # С помощью trim() убираем \n
                 $parameter = substr($line, $delimiterPos + 2);
                 $parameters[$currentParameterIndex] = $parameter;
             }
@@ -40,7 +36,7 @@ function parseUserFile(string $filename, array $parameters, array $parametersDes
         fclose($fileHandle);
         return $parameters;
     } else {
-        return NULL;  # что то пошло не так, неизвестно что
+        return null;  # что то пошло не так, неизвестно что
     } 
 }
 
@@ -62,9 +58,12 @@ function createUserFile(string $filename, array $parameters, array $parametersDe
 
 function dumpUserData(string $email, string $firstName, string $lastName, string $age): ?string
 {
-    # global $NO_EMAIL_ERROR, $FILE_ERROR, $RECORD_CREATED_OK;
     if ($email === '')  # Все параметры переведены к типу string. Значения NULL не должны попасть на вход
         return 'no_email';
+
+    $integerAge = intval($age);  # проверяем возраст
+    if (($integerAge <= 0) | ($integerAge > 140))
+        return 'invalid_age';
     
     if (file_exists('data') === false)  # если папка с юзерами отсутствует, создаём её
         mkdir('data');
@@ -76,7 +75,7 @@ function dumpUserData(string $email, string $firstName, string $lastName, string
     
     if (file_exists($relativePath . $email)) 
     {
-        $alreadyExistsParameters = parseUserFile($relativePath . $email, $parameters, $parametersDescriptions);
+        $alreadyExistsParameters = parseUserFile($relativePath . $email, $parametersDescriptions);
         if (is_null($alreadyExistsParameters))
             return 'file_error';
         

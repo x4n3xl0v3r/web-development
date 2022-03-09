@@ -5,7 +5,8 @@ header('Content-Type: text/plain');
 
 function checkIdentifier(string $ident, int $scanPos): ?bool
 {
-    if ($scanPos > 0) {
+    if ($scanPos > 0) 
+    {
         if (ctype_alpha($ident[$scanPos]) | is_numeric($ident[$scanPos]))
             return checkIdentifier($ident, $scanPos - 1);
     }

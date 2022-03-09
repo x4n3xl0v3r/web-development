@@ -44,7 +44,6 @@ function calculatePasswordStrength(string $password): ?int
     
     if ($lowCaseLetters != 0)
         $points += (strlen($password) - $lowCaseLetters) * 2;
-    # $points += (strlen($password) - $lowCaseLetters) * 2 * ($lowCaseLetters != 0);
         
     if (($upCaseLetters + $lowCaseLetters) == 0)  # если пароль состоит только из цифр
         $points -= strlen($password);
